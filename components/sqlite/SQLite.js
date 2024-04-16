@@ -1,6 +1,6 @@
 import * as SQLite from "expo-sqlite";
 
-const db = SQLite.openDatabase("login.db");
+const db = SQLite.openDatabase("credentials.db");
 
 
 export function initDatabase(db) {
@@ -8,8 +8,8 @@ export function initDatabase(db) {
     db.transaction((tx) => {
         tx.executeSql(
             "CREATE TABLE IF NOT EXISTS " +
-            "login " +
-            "(ID INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, emailid TEXT);",
+            "credentials" +
+            "(name TEXT, email TEXT);",
             [],
             (_, result) => {
                 console.log("Table creation query executed successfully:");
@@ -18,6 +18,10 @@ export function initDatabase(db) {
                 console.error("Error executing table creation query:", error);
             }
         );
+    }, (error) => {
+        console.error("Error initializing database transaction:", error);
+    }, () => {
+        console.log("Database initialized successfully.");
     });
 }
 

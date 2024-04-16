@@ -60,7 +60,7 @@ export const HorizontalScroll = () => {
                 loop={true}
                 autoplay={true}
                 autoplayInterval={3000}
-                onSnapToItem={(index) => setActiveIndex(index)}
+                // onSnapToItem={(index) => setActiveIndex(index)}
             />
         </SafeAreaView>
     );

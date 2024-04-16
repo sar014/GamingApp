@@ -37,7 +37,7 @@ export const Login = () => {
 
         db.transaction((tx) => {
             tx.executeSql(
-                "SELECT * FROM login WHERE name = ? AND emailid = ?",
+                "SELECT * FROM credentials WHERE name = ? AND email = ?",
                 [name, email],
                 (_, results) => {
                     if (results.rows.length > 0) {
@@ -47,10 +47,17 @@ export const Login = () => {
                             [{ text: "Okay" }]
                         );
                         navigation.navigate('Navbar');
-                    } else {
+                    } 
+                    else 
+                    {
+                        Alert.alert(
+                            "User DOES NOT Exists",
+                            "User with the provided details does not exists.",
+                            [{ text: "Okay" }]
+                        )
                         // User does not exist, proceed to save
                         tx.executeSql(
-                            "INSERT INTO login (name, emailid) VALUES (?, ?)",
+                            "INSERT INTO credentials (name, email) VALUES (?, ?)",
                             [name, email],
                             (_, insertResults) => {
                                 if (insertResults.rowsAffected > 0) {
@@ -79,7 +86,7 @@ export const Login = () => {
                     }
                 },
                 (error) => {
-                    console.error("Error checking existing user:", error);
+                    console.error("Error checking existing user:", error._error);
                     // Handle select error, such as displaying an error message to the user
                     Alert.alert("Database Error", "Failed to check existing user. Please try again later.", [{ text: "Okay" }]);
                 }
