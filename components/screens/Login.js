@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { useNavigation } from "@react-navigation/native"; 
 import db, { initDatabase } from "../sqlite/SQLite";
@@ -7,15 +7,6 @@ export const Login = () => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const navigation = useNavigation();
-
-    useEffect(() => {
-        try {
-            initDatabase(db);
-        } catch (error) {
-            console.error("Error initializing database:", error);
-            Alert.alert("Database Error", "Failed to initialize the database. Please try again later.", [{ text: "Okay" }]);
-        }
-    }, []);
 
     function validateInputs() {
         if (name.length < 3) {
@@ -30,65 +21,69 @@ export const Login = () => {
         return true;
     }
 
-    function saveTaskHandler() {
+    function loginUser() {
         if (!validateInputs()) {
             return;
         }
 
-        db.transaction((tx) => {
+        db.transaction(tx => {
             tx.executeSql(
                 "SELECT * FROM credentials WHERE name = ? AND email = ?",
                 [name, email],
                 (_, results) => {
                     if (results.rows.length > 0) {
                         Alert.alert(
-                            "User Exists",
-                            "User with the provided details already exists.",
+                            "Login Successful",
+                            "Welcome back!",
                             [{ text: "Okay" }]
                         );
                         navigation.navigate('Navbar');
-                    } 
-                    else 
-                    {
+                    } else {
                         Alert.alert(
-                            "User DOES NOT Exists",
-                            "User with the provided details does not exists.",
-                            [{ text: "Okay" }]
-                        )
-                        // User does not exist, proceed to save
-                        tx.executeSql(
-                            "INSERT INTO credentials (name, email) VALUES (?, ?)",
-                            [name, email],
-                            (_, insertResults) => {
-                                if (insertResults.rowsAffected > 0) {
-                                    Alert.alert(
-                                        "User Saved",
-                                        "User details have been saved successfully.",
-                                        [{ text: "Okay" }]
-                                    );
-                                    console.log("User saved successfully.");
-                                    navigation.navigate('Navbar');
-                                } else {
-                                    Alert.alert(
-                                        "User Saving Failed",
-                                        "There was an error saving user details.",
-                                        [{ text: "Okay" }]
-                                    );
-                                    console.log("Failed to save user details.");
-                                }
-                            },
-                            (error) => {
-                                console.error("Error saving user details:", error);
-                                // Handle insert error, such as displaying an error message to the user
-                                Alert.alert("Database Error", "Failed to save user details. Please try again later.", [{ text: "Okay" }]);
-                            }
+                            "User Not Found",
+                            "No user with the provided details exists. Would you like to register?",
+                            [
+                                { text: "Yes", onPress: registerUser },
+                                { text: "No" }
+                            ]
                         );
                     }
                 },
-                (error) => {
-                    console.error("Error checking existing user:", error._error);
-                    // Handle select error, such as displaying an error message to the user
+                error => {
+                    console.error("Error checking existing user:", error);
                     Alert.alert("Database Error", "Failed to check existing user. Please try again later.", [{ text: "Okay" }]);
+                }
+            );
+        });
+    }
+
+    function registerUser() {
+        if (!validateInputs()) {
+            return;
+        }
+
+        db.transaction(tx => {
+            tx.executeSql(
+                "INSERT INTO credentials (name, email) VALUES (?, ?)",
+                [name, email],
+                (_, results) => {
+                    if (results.rowsAffected > 0) {
+                        Alert.alert(
+                            "Registration Successful",
+                            "User registered successfully. You can now log in.",
+                            [{ text: "Okay" }]
+                        );
+                    } else {
+                        Alert.alert(
+                            "Registration Failed",
+                            "Failed to register user. Please try again later.",
+                            [{ text: "Okay" }]
+                        );
+                    }
+                },
+                error => {
+                    console.error("Error registering user:", error);
+                    Alert.alert("Database Error", "Failed to register user. Please try again later.", [{ text: "Okay" }]);
                 }
             );
         });
@@ -96,7 +91,7 @@ export const Login = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.headingText}>Register/Login</Text>
+            <Text style={styles.headingText}>Login/Register</Text>
             <TextInput
                 style={styles.textInput}
                 placeholder="Enter name"
@@ -107,14 +102,12 @@ export const Login = () => {
                 placeholder="Enter email"
                 onChangeText={(text) => setEmail(text)}
             />
-            <Pressable style={styles.buttonStyle} onPress={saveTaskHandler}>
-                <Text style={styles.buttonText}>Save</Text>
+            <Pressable style={styles.buttonStyle} onPress={loginUser}>
+                <Text style={styles.buttonText}>Login</Text>
             </Pressable>
         </View>
     );
 };
-
-
 
 const styles = StyleSheet.create({
     container: {
@@ -154,3 +147,5 @@ const styles = StyleSheet.create({
         color: 'white',
     },
 });
+
+export default Login;

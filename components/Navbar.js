@@ -65,7 +65,7 @@ export default function Navbar() {
             return (
               <View style={{alignItems:"center",justifyContent:"center"}}>
                 <Entypo name="newsletter" size={24} color={focused ? "#16247d" : "#111"} />
-                <Text style={{fontSize:12,color:"#16247d"}}>News</Text>
+                <Text style={{fontSize:12,color:"#16247d"}}>Reviews</Text>
               </View>
             )
           }
